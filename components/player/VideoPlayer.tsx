@@ -48,6 +48,7 @@ export function VideoPlayer({ src, title, onSourceError }: VideoPlayerProps) {
             isLoading ? "opacity-0" : "opacity-100"
           }`}
           allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-presentation"
           allow="autoplay; fullscreen; picture-in-picture; xr-spatial-tracking; clipboard-write"
           onLoad={() => setIsLoading(false)}
           onError={() => setHasError(true)}
