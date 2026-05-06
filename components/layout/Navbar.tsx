@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 const navLinks = [
   { name: "Movies", href: "/movies" },
   { name: "Series", href: "/series" },
+  { name: "Anime", href: "/anime" },
 ];
 
 export function Navbar() {

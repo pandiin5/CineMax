@@ -41,6 +41,9 @@ export const tmdb = {
   byGenre: (type: "movie" | "tv", genreId: number, page = 1) =>
     fetchTMDB<PaginatedResponse<Movie | TVSeries>>(`/discover/${type}?with_genres=${genreId}&page=${page}`),
 
+  genres: (type: "movie" | "tv") =>
+    fetchTMDB<{ genres: { id: number; name: string }[] }>(`/genre/${type}/list`),
+
   seasons: (seriesId: number, seasonNumber: number) =>
     fetchTMDB<TVSeasonDetail>(`/tv/${seriesId}/season/${seasonNumber}`),
 

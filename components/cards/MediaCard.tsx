@@ -12,12 +12,13 @@ interface MediaCardProps {
   id: number;
   title: string;
   posterPath: string | null;
-  rating: number;
-  year: string;
+  rating?: number;
+  year?: string;
   type: "movie" | "tv";
+  genre?: string;
 }
 
-export function MediaCard({ id, title, posterPath, rating, year, type }: MediaCardProps) {
+export function MediaCard({ id, title, posterPath, rating, year, type, genre }: MediaCardProps) {
   return (
     <Link href={`/${type === "movie" ? "movies" : "series"}/${id}`}>
       <motion.div
@@ -61,7 +62,10 @@ export function MediaCard({ id, title, posterPath, rating, year, type }: MediaCa
         {/* Card Footer */}
         <div className="p-3">
           <h3 className="text-white text-sm font-medium truncate">{title}</h3>
-          <p className="text-text-2 text-xs mt-1">{year}</p>
+          <p className="text-text-2 text-xs mt-1">
+            {year}
+            {genre && <span className="ml-2 text-accent">{genre}</span>}
+          </p>
         </div>
       </motion.div>
     </Link>

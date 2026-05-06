@@ -45,6 +45,13 @@ export function useByGenre(type: "movie" | "tv", genreId: number, page = 1) {
   });
 }
 
+export function useGenres(type: "movie" | "tv") {
+  return useQuery({
+    queryKey: ["genres", type],
+    queryFn: () => tmdb.genres(type),
+  });
+}
+
 export function useSeasons(seriesId: number, seasonNumber: number) {
   return useQuery({
     queryKey: ["season", seriesId, seasonNumber],
