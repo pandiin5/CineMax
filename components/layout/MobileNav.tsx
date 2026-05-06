@@ -9,6 +9,7 @@ const tabs = [
   { name: "Movies", href: "/movies", icon: Film },
   { name: "Series", href: "/series", icon: Tv },
   { name: "Anime", href: "/anime", icon: Tv },
+  { name: "K-Drama", href: "/kdrama", icon: Tv },
   { name: "Search", href: "/search", icon: Search },
   { name: "Watchlist", href: "/watchlist", icon: Heart },
 ];

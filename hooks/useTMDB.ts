@@ -52,6 +52,13 @@ export function useGenres(type: "movie" | "tv") {
   });
 }
 
+export function useKdrama(type: "movie" | "tv", page = 1) {
+  return useQuery({
+    queryKey: ["kdrama", type, page],
+    queryFn: () => tmdb.kdrama(type, page),
+  });
+}
+
 export function useSeasons(seriesId: number, seasonNumber: number) {
   return useQuery({
     queryKey: ["season", seriesId, seasonNumber],

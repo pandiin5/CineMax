@@ -9,6 +9,7 @@ const navLinks = [
   { name: "Movies", href: "/movies" },
   { name: "Series", href: "/series" },
   { name: "Anime", href: "/anime" },
+  { name: "K-Drama", href: "/kdrama" },
 ];
 
 export function Navbar() {
