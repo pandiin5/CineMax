@@ -10,6 +10,9 @@ const navLinks = [
   { name: "Series", href: "/series" },
   { name: "Anime", href: "/anime" },
   { name: "K-Drama", href: "/kdrama" },
+  { name: "Horror", href: "/horror" },
+  { name: "Action", href: "/action" },
+  { name: "Disaster", href: "/disaster" },
 ];
 
 export function Navbar() {
@@ -26,9 +29,8 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-bg/80 backdrop-blur-md border-b border-border/50 py-3" : "bg-transparent py-5"
-      }`}
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-bg/80 backdrop-blur-md border-b border-border/50 py-3" : "bg-transparent py-5"
+        }`}
     >
       <div className="container mx-auto px-4 md:px-8 flex items-center justify-between">
         {/* Logo */}
@@ -44,9 +46,8 @@ export function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-white ${
-                  isActive ? "text-white" : "text-text-2"
-                } relative`}
+                className={`text-sm font-medium transition-colors hover:text-white ${isActive ? "text-white" : "text-text-2"
+                  } relative`}
               >
                 {link.name}
                 {isActive && (

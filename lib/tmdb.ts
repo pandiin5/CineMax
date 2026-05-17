@@ -14,7 +14,7 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 async function fetchTMDB<T>(endpoint: string): Promise<T> {
   const separator = endpoint.includes("?") ? "&" : "?";
   const url = `${TMDB_BASE}${endpoint}${separator}api_key=${TMDB_KEY}`;
-  
+
   const res = await fetch(url, { next: { revalidate: 3600 } });
   if (!res.ok) {
     throw new Error(`Failed to fetch TMDB: ${res.statusText}`);
@@ -40,6 +40,9 @@ export const tmdb = {
 
   byGenre: (type: "movie" | "tv", genreId: number, page = 1) =>
     fetchTMDB<PaginatedResponse<Movie | TVSeries>>(`/discover/${type}?with_genres=${genreId}&page=${page}`),
+
+  byKeyword: (type: "movie" | "tv", keywordId: number, page = 1) =>
+    fetchTMDB<PaginatedResponse<Movie | TVSeries>>(`/discover/${type}?with_keywords=${keywordId}&page=${page}`),
 
   genres: (type: "movie" | "tv") =>
     fetchTMDB<{ genres: { id: number; name: string }[] }>(`/genre/${type}/list`),

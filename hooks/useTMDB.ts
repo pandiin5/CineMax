@@ -45,6 +45,13 @@ export function useByGenre(type: "movie" | "tv", genreId: number, page = 1) {
   });
 }
 
+export function useByKeyword(type: "movie" | "tv", keywordId: number, page = 1) {
+  return useQuery({
+    queryKey: ["keyword", type, keywordId, page],
+    queryFn: () => tmdb.byKeyword(type, keywordId, page),
+  });
+}
+
 export function useGenres(type: "movie" | "tv") {
   return useQuery({
     queryKey: ["genres", type],
