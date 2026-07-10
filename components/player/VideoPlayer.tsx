@@ -42,6 +42,7 @@ export function VideoPlayer({ src, title, onSourceError }: VideoPlayerProps) {
         </div>
       ) : (
         <iframe
+          key={src}
           src={src}
           title={title}
           className={`w-full h-full border-0 transition-opacity duration-500 ${
