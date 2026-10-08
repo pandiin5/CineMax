@@ -11,6 +11,8 @@ import Image from "next/image";
 import { tmdb } from "@/lib/tmdb";
 import { MovieDetail } from "@/types/tmdb";
 
+import { ServerSelector } from "@/components/player/ServerSelector";
+
 export default function MoviePage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const id = parseInt(unwrappedParams.id, 10);
@@ -42,28 +44,23 @@ export default function MoviePage({ params }: { params: Promise<{ id: string }> 
 
       <div className="container mx-auto px-4 md:px-8 mt-12 space-y-16">
         {/* Player Section */}
-        <div ref={playerRef} className="max-w-5xl mx-auto scroll-mt-24">
-          <div className="flex items-center justify-between mb-4">
+        <div ref={playerRef} className="max-w-5xl mx-auto scroll-mt-24 space-y-4">
+          <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white">Watch Now</h2>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-text-2">Server:</span>
-              <select
-                value={sourceIndex}
-                onChange={(e) => setSourceIndex(parseInt(e.target.value, 10))}
-                className="bg-surface border border-border text-white text-sm rounded-md px-3 py-1 outline-none focus:border-accent"
-              >
-                {sources.map((_, idx) => (
-                  <option key={idx} value={idx}>
-                    Server {idx + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
+
           <VideoPlayer
             src={sources[sourceIndex]}
             title={movie.title}
+            serverIndex={sourceIndex}
+            onServerChange={setSourceIndex}
             onSourceError={sourceIndex < sources.length - 1 ? handleSourceError : undefined}
+          />
+
+          <ServerSelector
+            currentIndex={sourceIndex}
+            onSelectServer={setSourceIndex}
+            className="pt-2"
           />
         </div>
 

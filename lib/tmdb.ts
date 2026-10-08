@@ -8,7 +8,7 @@ import {
 } from "@/types/tmdb";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const TMDB_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || "844dba0bfd8f3a4f3799f6130ef9e335";
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
 async function fetchTMDB<T>(endpoint: string): Promise<T> {
@@ -53,6 +53,9 @@ export const tmdb = {
   seasons: (seriesId: number, seasonNumber: number) =>
     fetchTMDB<TVSeasonDetail>(`/tv/${seriesId}/season/${seasonNumber}`),
 
-  imgUrl: (path: string | null, size: "w185" | "w342" | "w500" | "w780" | "original" = "w500") =>
-    path ? `${IMG_BASE}/${size}${path}` : "/placeholder.png", // We will need a placeholder
+  imgUrl: (path: string | null | undefined, size: "w185" | "w342" | "w500" | "w780" | "original" = "w500") =>
+    path
+      ? `${IMG_BASE}/${size}${path}`
+      : "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%22750%22%20viewBox%3D%220%200%20500%20750%22%3E%3Crect%20fill%3D%22%2312121A%22%20width%3D%22500%22%20height%3D%22750%22%2F%3E%3Ctext%20fill%3D%22%235A5A72%22%20font-family%3D%22sans-serif%22%20font-size%3D%2224%22%20text-anchor%3D%22middle%22%20x%3D%22250%22%20y%3D%22375%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E",
 };
+

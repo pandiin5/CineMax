@@ -12,6 +12,8 @@ import { tmdb } from "@/lib/tmdb";
 import { TVDetail } from "@/types/tmdb";
 import { Play } from "lucide-react";
 
+import { ServerSelector } from "@/components/player/ServerSelector";
+
 export default function SeriesPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const id = parseInt(unwrappedParams.id, 10);
@@ -75,8 +77,8 @@ export default function SeriesPage({ params }: { params: Promise<{ id: string }>
 
       <div className="container mx-auto px-4 md:px-8 mt-12 space-y-16">
         {/* Player Section */}
-        <div ref={playerRef} className="max-w-5xl mx-auto scroll-mt-24">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
+        <div ref={playerRef} className="max-w-5xl mx-auto scroll-mt-24 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">Watch Now</h2>
               <p className="text-text-2 text-sm">Season {selectedSeason} &bull; Episode {selectedEpisode}</p>
@@ -94,27 +96,21 @@ export default function SeriesPage({ params }: { params: Promise<{ id: string }>
                   </option>
                 ))}
               </select>
-              <div className="flex items-center gap-2 hidden md:flex">
-                <span className="text-sm text-text-2">Server:</span>
-                <select
-                  value={sourceIndex}
-                  onChange={(e) => setSourceIndex(parseInt(e.target.value, 10))}
-                  className="bg-surface border border-border text-white text-sm rounded-md px-3 py-2 outline-none focus:border-accent"
-                >
-                  {sources.map((_, idx) => (
-                    <option key={idx} value={idx}>
-                      Server {idx + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           </div>
           
           <VideoPlayer
             src={sources[sourceIndex]}
             title={`${series.name} S${selectedSeason} E${selectedEpisode}`}
+            serverIndex={sourceIndex}
+            onServerChange={setSourceIndex}
             onSourceError={sourceIndex < sources.length - 1 ? handleSourceError : undefined}
+          />
+
+          <ServerSelector
+            currentIndex={sourceIndex}
+            onSelectServer={setSourceIndex}
+            className="pt-2"
           />
         </div>
 
