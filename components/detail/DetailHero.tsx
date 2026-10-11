@@ -113,11 +113,10 @@ export function DetailHero({ item, type, onPlayClick }: DetailHeroProps) {
             </button>
             <button
               onClick={handleWatchlistToggle}
-              className={`px-6 py-3.5 rounded-md font-medium flex items-center gap-2 transition-all border ${
-                saved
+              className={`px-6 py-3.5 rounded-md font-medium flex items-center gap-2 transition-all border ${saved
                   ? "bg-white/10 text-accent border-accent"
                   : "bg-surface-2/80 text-white hover:bg-surface border-border"
-              }`}
+                }`}
             >
               <Heart size={20} fill={saved ? "currentColor" : "none"} />
               {saved ? "Saved" : "Add to Watchlist"}

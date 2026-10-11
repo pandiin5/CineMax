@@ -72,3 +72,19 @@ export function useSeasons(seriesId: number, seasonNumber: number) {
     queryFn: () => tmdb.seasons(seriesId, seasonNumber),
   });
 }
+
+export function useWatchProviders(type: "movie" | "tv", id: number) {
+  return useQuery({
+    queryKey: ["watchProviders", type, id],
+    queryFn: () => tmdb.watchProviders(type, id),
+    enabled: !!id,
+  });
+}
+
+export function useVideos(type: "movie" | "tv", id: number) {
+  return useQuery({
+    queryKey: ["videos", type, id],
+    queryFn: () => tmdb.videos(type, id),
+    enabled: !!id,
+  });
+}

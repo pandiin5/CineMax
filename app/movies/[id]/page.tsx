@@ -1,17 +1,14 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useRef } from "react";
 import { useDetail } from "@/hooks/useTMDB";
 import { DetailHero } from "@/components/detail/DetailHero";
-import { VideoPlayer } from "@/components/player/VideoPlayer";
-import { embedUrls } from "@/lib/player";
+import { DualModePlayer } from "@/components/player/DualModePlayer";
 import { ContentRow } from "@/components/home/ContentRow";
 import { Skeleton } from "@/components/ui/Skeleton";
 import Image from "next/image";
 import { tmdb } from "@/lib/tmdb";
 import { MovieDetail } from "@/types/tmdb";
-
-import { ServerSelector } from "@/components/player/ServerSelector";
 
 export default function MoviePage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -19,21 +16,16 @@ export default function MoviePage({ params }: { params: Promise<{ id: string }> 
   const { data, isLoading } = useDetail("movie", id);
   const playerRef = useRef<HTMLDivElement>(null);
 
-  const sources = embedUrls.movie(id);
-  const [sourceIndex, setSourceIndex] = useState(0);
-
   const scrollToPlayer = () => {
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  const handleSourceError = () => {
-    if (sourceIndex < sources.length - 1) {
-      setSourceIndex(sourceIndex + 1);
-    }
-  };
-
   if (isLoading || !data) {
-    return <div className="min-h-screen bg-bg flex items-center justify-center pt-20"><Skeleton className="w-full h-[80vh]" /></div>;
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center pt-20">
+        <Skeleton className="w-full h-[80vh]" />
+      </div>
+    );
   }
 
   const movie = data as MovieDetail;
@@ -43,24 +35,13 @@ export default function MoviePage({ params }: { params: Promise<{ id: string }> 
       <DetailHero item={movie} type="movie" onPlayClick={scrollToPlayer} />
 
       <div className="container mx-auto px-4 md:px-8 mt-12 space-y-16">
-        {/* Player Section */}
-        <div ref={playerRef} className="max-w-5xl mx-auto scroll-mt-24 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Watch Now</h2>
-          </div>
-
-          <VideoPlayer
-            src={sources[sourceIndex]}
+        {/* Dual Mode Player (HD / 4K Streaming + Trailer) */}
+        <div ref={playerRef} className="max-w-5xl mx-auto scroll-mt-24 space-y-8">
+          <DualModePlayer
+            type="movie"
+            id={id}
             title={movie.title}
-            serverIndex={sourceIndex}
-            onServerChange={setSourceIndex}
-            onSourceError={sourceIndex < sources.length - 1 ? handleSourceError : undefined}
-          />
-
-          <ServerSelector
-            currentIndex={sourceIndex}
-            onSelectServer={setSourceIndex}
-            className="pt-2"
+            backdropPath={movie.backdrop_path}
           />
         </div>
 

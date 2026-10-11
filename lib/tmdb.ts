@@ -5,6 +5,8 @@ import {
   MovieDetail,
   TVDetail,
   TVSeasonDetail,
+  WatchProvidersResponse,
+  VideosResponse,
 } from "@/types/tmdb";
 
 import { UnifiedGenre } from "@/lib/genres";
@@ -79,17 +81,17 @@ export const tmdb = {
     const [movieRes, tvRes] = await Promise.all([
       fetchMovie
         ? tmdb.discover("movie", {
-            year: params.year ?? undefined,
-            genreId: params.genreConfig?.movieGenreId,
-            page,
-          })
+          year: params.year ?? undefined,
+          genreId: params.genreConfig?.movieGenreId,
+          page,
+        })
         : Promise.resolve({ page, results: [] as Movie[], total_pages: 0, total_results: 0 }),
       fetchTv
         ? tmdb.discover("tv", {
-            year: params.year ?? undefined,
-            genreId: params.genreConfig?.tvGenreId,
-            page,
-          })
+          year: params.year ?? undefined,
+          genreId: params.genreConfig?.tvGenreId,
+          page,
+        })
         : Promise.resolve({ page, results: [] as TVSeries[], total_pages: 0, total_results: 0 }),
     ]);
 
@@ -146,9 +148,24 @@ export const tmdb = {
   seasons: (seriesId: number, seasonNumber: number) =>
     fetchTMDB<TVSeasonDetail>(`/tv/${seriesId}/season/${seasonNumber}`),
 
+  watchProviders: async (type: "movie" | "tv", id: number): Promise<WatchProvidersResponse> => {
+    const res = await fetch(`/api/tmdb/watch-providers?type=${type}&id=${id}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch watch providers: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  videos: async (type: "movie" | "tv", id: number): Promise<VideosResponse> => {
+    const res = await fetch(`/api/tmdb/videos?type=${type}&id=${id}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch videos: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
   imgUrl: (path: string | null | undefined, size: "w185" | "w342" | "w500" | "w780" | "original" = "w500") =>
     path
       ? `${IMG_BASE}/${size}${path}`
       : "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%22750%22%20viewBox%3D%220%200%20500%20750%22%3E%3Crect%20fill%3D%22%2312121A%22%20width%3D%22500%22%20height%3D%22750%22%2F%3E%3Ctext%20fill%3D%22%235A5A72%22%20font-family%3D%22sans-serif%22%20font-size%3D%2224%22%20text-anchor%3D%22middle%22%20x%3D%22250%22%20y%3D%22375%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E",
 };
-

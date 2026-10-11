@@ -115,3 +115,42 @@ export interface TVEpisode {
 export interface TVSeasonDetail extends TVSeason {
   episodes: TVEpisode[];
 }
+
+export interface WatchProviderItem {
+  logo_path: string;
+  provider_id: number;
+  provider_name: string;
+  display_priority: number;
+}
+
+export interface CountryWatchProviders {
+  link: string;
+  flatrate?: WatchProviderItem[];
+  rent?: WatchProviderItem[];
+  buy?: WatchProviderItem[];
+  ads?: WatchProviderItem[];
+  free?: WatchProviderItem[];
+}
+
+export interface WatchProvidersResponse {
+  id: number;
+  results: Record<string, CountryWatchProviders>;
+}
+
+export interface VideoItem {
+  id: string;
+  iso_639_1: string;
+  iso_3166_1: string;
+  key: string;
+  name: string;
+  site: string;
+  size: number;
+  type: string;
+  official: boolean;
+  published_at?: string;
+}
+
+export interface VideosResponse {
+  id: number;
+  results: VideoItem[];
+}
