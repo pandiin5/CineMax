@@ -10,6 +10,8 @@ export interface Movie {
   vote_count: number;
   genre_ids: number[];
   adult: boolean;
+  popularity?: number;
+  media_type?: "movie";
 }
 
 export interface TVSeries {
@@ -23,6 +25,8 @@ export interface TVSeries {
   vote_average: number;
   vote_count: number;
   genre_ids: number[];
+  popularity?: number;
+  media_type?: "tv";
 }
 
 export interface Genre {

@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { tmdb } from "@/lib/tmdb";
 import { MovieDetail, TVDetail } from "@/types/tmdb";
 
-export function useTrending(type: "movie" | "tv", window: "day" | "week" = "day") {
+export function useTrending(type: "movie" | "tv" | "all" = "movie", window: "day" | "week" = "day", page = 1) {
   return useQuery({
-    queryKey: ["trending", type, window],
-    queryFn: () => tmdb.trending(type, window),
+    queryKey: ["trending", type, window, page],
+    queryFn: () => tmdb.trending(type, window, page),
   });
 }
 

@@ -7,6 +7,8 @@ import {
   TVSeasonDetail,
 } from "@/types/tmdb";
 
+import { UnifiedGenre } from "@/lib/genres";
+
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || "844dba0bfd8f3a4f3799f6130ef9e335";
 const IMG_BASE = "https://image.tmdb.org/t/p";
@@ -23,8 +25,99 @@ async function fetchTMDB<T>(endpoint: string): Promise<T> {
 }
 
 export const tmdb = {
-  trending: (type: "movie" | "tv", window: "day" | "week" = "day") =>
-    fetchTMDB<PaginatedResponse<Movie | TVSeries>>(`/trending/${type}/${window}`),
+  trending: (type: "movie" | "tv" | "all" = "movie", window: "day" | "week" = "day", page = 1) =>
+    fetchTMDB<PaginatedResponse<Movie | TVSeries>>(`/trending/${type}/${window}?page=${page}`),
+
+  discover: <T extends "movie" | "tv">(
+    type: T,
+    params: {
+      year?: number;
+      genreId?: number;
+      page?: number;
+      sortBy?: string;
+    } = {}
+  ): Promise<PaginatedResponse<T extends "movie" ? Movie : TVSeries>> => {
+    const searchParams = new URLSearchParams();
+    searchParams.set("page", String(params.page || 1));
+    searchParams.set("sort_by", params.sortBy || "popularity.desc");
+
+    if (params.genreId) {
+      searchParams.set("with_genres", String(params.genreId));
+    }
+
+    if (params.year) {
+      if (type === "movie") {
+        searchParams.set("primary_release_year", String(params.year));
+      } else {
+        searchParams.set("first_air_date_year", String(params.year));
+      }
+    }
+
+    return fetchTMDB<PaginatedResponse<T extends "movie" ? Movie : TVSeries>>(
+      `/discover/${type}?${searchParams.toString()}`
+    );
+  },
+
+  discoverCombined: async (
+    params: {
+      year?: number | null;
+      genreConfig?: UnifiedGenre | null;
+      page?: number;
+    } = {}
+  ): Promise<{
+    results: (Movie | TVSeries)[];
+    page: number;
+    hasMore: boolean;
+    totalPages: number;
+    totalResults: number;
+  }> => {
+    const page = params.page || 1;
+    const hasGenre = !!params.genreConfig;
+    const fetchMovie = !hasGenre || params.genreConfig?.movieGenreId !== undefined;
+    const fetchTv = !hasGenre || params.genreConfig?.tvGenreId !== undefined;
+
+    const [movieRes, tvRes] = await Promise.all([
+      fetchMovie
+        ? tmdb.discover("movie", {
+            year: params.year ?? undefined,
+            genreId: params.genreConfig?.movieGenreId,
+            page,
+          })
+        : Promise.resolve({ page, results: [] as Movie[], total_pages: 0, total_results: 0 }),
+      fetchTv
+        ? tmdb.discover("tv", {
+            year: params.year ?? undefined,
+            genreId: params.genreConfig?.tvGenreId,
+            page,
+          })
+        : Promise.resolve({ page, results: [] as TVSeries[], total_pages: 0, total_results: 0 }),
+    ]);
+
+    const movies: Movie[] = (movieRes.results || []).map((m) => ({
+      ...m,
+      media_type: "movie" as const,
+    }));
+    const tvSeries: TVSeries[] = (tvRes.results || []).map((t) => ({
+      ...t,
+      media_type: "tv" as const,
+    }));
+
+    const combined: (Movie | TVSeries)[] = [...movies, ...tvSeries].sort(
+      (a, b) => ((b as any).popularity ?? 0) - ((a as any).popularity ?? 0)
+    );
+
+    const hasMore =
+      (fetchMovie && movieRes.page < movieRes.total_pages) ||
+      (fetchTv && tvRes.page < tvRes.total_pages);
+
+    return {
+      results: combined,
+      page,
+      hasMore,
+      totalPages: Math.max(movieRes.total_pages, tvRes.total_pages),
+      totalResults: (movieRes.total_results || 0) + (tvRes.total_results || 0),
+    };
+  },
 
   popular: (type: "movie" | "tv", page = 1) =>
     fetchTMDB<PaginatedResponse<Movie | TVSeries>>(`/${type}/popular?page=${page}`),
