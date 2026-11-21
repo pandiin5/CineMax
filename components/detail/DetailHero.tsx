@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Play, Heart, Share } from "lucide-react";
+import { Play, Heart, Share, Clock, CheckCircle2, Video } from "lucide-react";
 import { tmdb } from "@/lib/tmdb";
 import { StarRating } from "@/components/ui/StarRating";
 import { Badge } from "@/components/ui/Badge";
 import { MovieDetail, TVDetail } from "@/types/tmdb";
 import { useWatchlist } from "@/hooks/useWatchlist";
+import { getReleaseStatus } from "@/lib/dates";
 
 interface DetailHeroProps {
   item: MovieDetail | TVDetail;
@@ -21,7 +22,10 @@ export function DetailHero({ item, type, onPlayClick }: DetailHeroProps) {
 
   const title = "title" in item ? item.title : item.name;
   const originalTitle = "original_title" in item ? item.original_title : item.original_name;
-  const releaseYear = ("release_date" in item ? item.release_date : item.first_air_date)?.substring(0, 4);
+  const fullReleaseDate = "release_date" in item ? item.release_date : item.first_air_date;
+  const releaseYear = fullReleaseDate?.substring(0, 4);
+  const releaseStatus = getReleaseStatus(fullReleaseDate);
+  const isOut = releaseStatus ? releaseStatus.isOut : true;
   const duration = "runtime" in item ? `${item.runtime} min` : `${item.number_of_seasons} Seasons`;
 
   const handleWatchlistToggle = () => {
@@ -80,13 +84,35 @@ export function DetailHero({ item, type, onPlayClick }: DetailHeroProps) {
               <p className="text-lg text-text-2 italic font-serif mb-4">"{item.tagline}"</p>
             )}
 
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm font-medium text-text-2 mb-6 uppercase tracking-wider">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm font-medium text-text-2 mb-4 uppercase tracking-wider">
               <span>{releaseYear}</span>
               <span className="w-1 h-1 bg-border rounded-full" />
               <span>{duration}</span>
               <span className="w-1 h-1 bg-border rounded-full" />
               <StarRating rating={item.vote_average} className="scale-110 origin-left" />
             </div>
+
+            {/* Release Status Banner */}
+            {releaseStatus && (
+              <div className="flex items-center justify-center md:justify-start mb-6">
+                {releaseStatus.isToday ? (
+                  <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                    Released Today ({releaseStatus.formattedDate})
+                  </span>
+                ) : releaseStatus.isOut ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-600/90 text-white shadow-md">
+                    <CheckCircle2 size={14} />
+                    Out Now &bull; Released {releaseStatus.formattedDate}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-amber-500 text-black shadow-lg shadow-amber-500/25">
+                    <Clock size={14} />
+                    Coming Soon &bull; Releasing {releaseStatus.formattedDate} ({releaseStatus.label})
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-6">
               {item.genres?.map((g) => (
@@ -104,13 +130,23 @@ export function DetailHero({ item, type, onPlayClick }: DetailHeroProps) {
 
           {/* Actions */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
-            <button
-              onClick={onPlayClick}
-              className="bg-accent hover:bg-accent-2 text-white px-8 py-3.5 rounded-md font-medium flex items-center gap-2 transition-colors shadow-lg shadow-accent/20"
-            >
-              <Play size={20} fill="currentColor" />
-              Watch Now
-            </button>
+            {releaseStatus && !isOut ? (
+              <button
+                onClick={onPlayClick}
+                className="bg-amber-500 hover:bg-amber-400 text-black px-8 py-3.5 rounded-md font-bold flex items-center gap-2 transition-colors shadow-lg shadow-amber-500/25 cursor-pointer"
+              >
+                <Video size={20} />
+                Watch Official Trailer
+              </button>
+            ) : (
+              <button
+                onClick={onPlayClick}
+                className="bg-accent hover:bg-accent-2 text-white px-8 py-3.5 rounded-md font-medium flex items-center gap-2 transition-colors shadow-lg shadow-accent/20 cursor-pointer"
+              >
+                <Play size={20} fill="currentColor" />
+                Watch Now
+              </button>
+            )}
             <button
               onClick={handleWatchlistToggle}
               className={`px-6 py-3.5 rounded-md font-medium flex items-center gap-2 transition-all border ${saved

@@ -2,6 +2,7 @@
 
 import { HeroBanner } from "@/components/home/HeroBanner";
 import { ContentRow } from "@/components/home/ContentRow";
+import { TodayReleasesRow } from "@/components/home/TodayReleasesRow";
 import { useTrending, usePopular, useTopRated } from "@/hooks/useTMDB";
 
 export default function Home() {
@@ -15,6 +16,10 @@ export default function Home() {
       <HeroBanner />
       
       <div className="flex flex-col gap-4 py-8 relative z-30 -mt-24 md:-mt-32">
+        {/* Today's New Releases: Movies released today & Series airing today */}
+        <TodayReleasesRow />
+
+        {/* Trending This Week */}
         <ContentRow
           title="Trending This Week"
           items={trendingMovies?.results || []}
@@ -22,6 +27,7 @@ export default function Home() {
           type="movie"
           href="/movies"
         />
+
         <ContentRow
           title="Popular Movies"
           items={popularMovies?.results || []}
@@ -29,6 +35,7 @@ export default function Home() {
           type="movie"
           href="/movies"
         />
+
         <ContentRow
           title="Popular Series"
           items={popularSeries?.results || []}
@@ -36,6 +43,7 @@ export default function Home() {
           type="tv"
           href="/series"
         />
+
         <ContentRow
           title="Top Rated Movies"
           items={topRatedMovies?.results || []}

@@ -88,3 +88,45 @@ export function useVideos(type: "movie" | "tv", id: number) {
     enabled: !!id,
   });
 }
+
+export function useUpcomingThisWeek(daysBack = 3, daysForward = 7) {
+  return useQuery({
+    queryKey: ["upcomingThisWeek", daysBack, daysForward],
+    queryFn: () => tmdb.upcomingThisWeek(daysBack, daysForward),
+  });
+}
+
+export function useTodayReleases() {
+  return useQuery({
+    queryKey: ["todayReleases"],
+    queryFn: () => tmdb.todayReleases(),
+  });
+}
+
+export function useUpcomingMovies(page = 1) {
+  return useQuery({
+    queryKey: ["upcomingMovies", page],
+    queryFn: () => tmdb.upcomingMovies(page),
+  });
+}
+
+export function useNowPlayingMovies(page = 1) {
+  return useQuery({
+    queryKey: ["nowPlayingMovies", page],
+    queryFn: () => tmdb.nowPlayingMovies(page),
+  });
+}
+
+export function useAiringTodayTV(page = 1) {
+  return useQuery({
+    queryKey: ["airingTodayTV", page],
+    queryFn: () => tmdb.airingTodayTV(page),
+  });
+}
+
+export function useOnTheAirTV(page = 1) {
+  return useQuery({
+    queryKey: ["onTheAirTV", page],
+    queryFn: () => tmdb.onTheAirTV(page),
+  });
+}

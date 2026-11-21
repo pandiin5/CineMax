@@ -10,6 +10,7 @@ import {
 } from "@/types/tmdb";
 
 import { UnifiedGenre } from "@/lib/genres";
+import { getWeekDateRange, formatDateISO } from "@/lib/dates";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || "844dba0bfd8f3a4f3799f6130ef9e335";
@@ -147,6 +148,89 @@ export const tmdb = {
 
   seasons: (seriesId: number, seasonNumber: number) =>
     fetchTMDB<TVSeasonDetail>(`/tv/${seriesId}/season/${seasonNumber}`),
+
+  upcomingMovies: (page = 1) =>
+    fetchTMDB<PaginatedResponse<Movie>>(`/movie/upcoming?page=${page}`),
+
+  nowPlayingMovies: (page = 1) =>
+    fetchTMDB<PaginatedResponse<Movie>>(`/movie/now_playing?page=${page}`),
+
+  airingTodayTV: (page = 1) =>
+    fetchTMDB<PaginatedResponse<TVSeries>>(`/tv/airing_today?page=${page}`),
+
+  onTheAirTV: (page = 1) =>
+    fetchTMDB<PaginatedResponse<TVSeries>>(`/tv/on_the_air?page=${page}`),
+
+  upcomingThisWeek: async (daysBack = 3, daysForward = 7) => {
+    const { startStr, endStr } = getWeekDateRange(daysBack, daysForward);
+    const [mWeek, mUpcoming, tvWeek, tvOnAir] = await Promise.all([
+      fetchTMDB<PaginatedResponse<Movie>>(
+        `/discover/movie?primary_release_date.gte=${startStr}&primary_release_date.lte=${endStr}&sort_by=popularity.desc`
+      ).catch(() => ({ results: [] as Movie[], page: 1, total_pages: 0, total_results: 0 })),
+      fetchTMDB<PaginatedResponse<Movie>>(`/movie/upcoming?page=1`).catch(() => ({ results: [] as Movie[], page: 1, total_pages: 0, total_results: 0 })),
+      fetchTMDB<PaginatedResponse<TVSeries>>(
+        `/discover/tv?first_air_date.gte=${startStr}&first_air_date.lte=${endStr}&sort_by=popularity.desc`
+      ).catch(() => ({ results: [] as TVSeries[], page: 1, total_pages: 0, total_results: 0 })),
+      fetchTMDB<PaginatedResponse<TVSeries>>(`/tv/on_the_air?page=1`).catch(() => ({ results: [] as TVSeries[], page: 1, total_pages: 0, total_results: 0 })),
+    ]);
+
+    const seen = new Set<string>();
+    const movies: Movie[] = [];
+    [...(mWeek.results || []), ...(mUpcoming.results || [])].forEach((m) => {
+      const key = `movie_${m.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        movies.push({ ...m, media_type: "movie" });
+      }
+    });
+
+    const series: TVSeries[] = [];
+    [...(tvWeek.results || []), ...(tvOnAir.results || [])].forEach((t) => {
+      const key = `tv_${t.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        series.push({ ...t, media_type: "tv" });
+      }
+    });
+
+    const all: (Movie | TVSeries)[] = [...movies, ...series].sort(
+      (a, b) => ((b as any).popularity ?? 0) - ((a as any).popularity ?? 0)
+    );
+
+    return { results: all, movies, series };
+  },
+
+  todayReleases: async () => {
+    const todayStr = formatDateISO(new Date());
+    const [mToday, mNow, tvToday] = await Promise.all([
+      fetchTMDB<PaginatedResponse<Movie>>(
+        `/discover/movie?primary_release_date.gte=${todayStr}&primary_release_date.lte=${todayStr}&sort_by=popularity.desc`
+      ).catch(() => ({ results: [] as Movie[], page: 1, total_pages: 0, total_results: 0 })),
+      fetchTMDB<PaginatedResponse<Movie>>(`/movie/now_playing?page=1`).catch(() => ({ results: [] as Movie[], page: 1, total_pages: 0, total_results: 0 })),
+      fetchTMDB<PaginatedResponse<TVSeries>>(`/tv/airing_today?page=1`).catch(() => ({ results: [] as TVSeries[], page: 1, total_pages: 0, total_results: 0 })),
+    ]);
+
+    const seen = new Set<string>();
+    const movies: Movie[] = [];
+    [...(mToday.results || []), ...(mNow.results || [])].forEach((m) => {
+      const key = `movie_${m.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        movies.push({ ...m, media_type: "movie" });
+      }
+    });
+
+    const series: TVSeries[] = (tvToday.results || []).map((t) => ({
+      ...t,
+      media_type: "tv" as const,
+    }));
+
+    const all: (Movie | TVSeries)[] = [...movies, ...series].sort(
+      (a, b) => ((b as any).popularity ?? 0) - ((a as any).popularity ?? 0)
+    );
+
+    return { results: all, movies, series };
+  },
 
   watchProviders: async (type: "movie" | "tv", id: number): Promise<WatchProvidersResponse> => {
     const res = await fetch(`/api/tmdb/watch-providers?type=${type}&id=${id}`);
